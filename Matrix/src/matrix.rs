@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use std::ops::{Add, Sub, AddAssign, SubAssign};
+use std::ops::{Add, Sub, Mul, AddAssign, SubAssign};
 
 pub struct Matrix<T, R, C, S>{
 	pub data: S,
@@ -52,3 +52,17 @@ where
 	}
 }
 
+impl<T, R, C, S> Mul<T> for Matrix<T, R, C, S>
+where
+	S: Mul<T, Output = S>,
+	T: Copy,
+{
+	type Output = Self;
+
+	fn mul(self, rhs: T) -> Self::Output {
+		Self {
+			data: self.data * rhs,
+			_phatomns: PhantomData,
+		}
+	}
+}
