@@ -1,3 +1,4 @@
-pub mod matrix;
-pub mod vector;
-pub mod array_storage;
+pub mod base;
+pub mod simd;
+// pub use crate::base::*;
+
