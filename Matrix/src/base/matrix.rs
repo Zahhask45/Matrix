@@ -1,9 +1,15 @@
+use crate::base::{Scalar};
+
 use std::marker::PhantomData;
 use std::ops::{Add, Sub, Mul, AddAssign, SubAssign};
 
 pub struct Matrix<T, R, C, S>{
 	pub data: S,
 	_phatomns: PhantomData<(T, R, C)>,
+}
+
+impl<T, R: Dim, C: Dim, S: fmt::Debug> fmt::Debug for Matrix<T, R, C, S>{
+	
 }
 
 impl<T, R, C, S> Add for Matrix<T, R, C, S>
