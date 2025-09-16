@@ -1,4 +1,6 @@
 pub mod base;
+pub use crate::base::*;
+
 pub mod simd;
-// pub use crate::base::*;
+pub use crate::simd::*;
 

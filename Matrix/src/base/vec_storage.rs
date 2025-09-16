@@ -28,3 +28,36 @@ impl<T, C: DimName> Default for VecStorage<T, Dyn, C> {
 		}
 	}
 }
+
+impl <T, R: Dim, C: Dim> VecStorage<T, R, C> {
+	#[inline]
+	pub fn new(nrows: R, ncols: C, data: Vec<T>) -> Self {
+		assert!(nrows.value() * ncols.value() == data.len(),
+		"Data storage buffer dimension mismatch.");
+
+		Self {data, nrows, ncols}
+	}
+
+	#[inline]
+	#[must_use]
+	pub const fn as_vec(&self) -> &Vec<T> {
+		&self.data
+	}
+
+	#[inline]
+	#[must_use]
+	pub const fn len(&self) -> usize {
+		self.data.len()
+	}
+
+	#[inline]
+	#[must_use]
+	pub const fn is_empty(&self) -> bool {
+		self.data.len() == 0
+	}
+
+	#[inline]
+	pub fn as_slice(&self) -> &[T] {
+		&self.data[..]
+	}
+}

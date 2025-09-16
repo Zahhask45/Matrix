@@ -14,3 +14,10 @@ pub unsafe trait RawStorage<T, R: Dim, C: Dim = U1>: Sized {
 
 	fn strides(&self) -> (Self::RStride, Self::CStride);
 }
+
+
+pub unsafe trait Storage<T: Scalar, R: Dim, C: Dim = U1>: RawStorage<T, R, C> {
+	fn into_owned(self) -> Owned<T, R, C>
+	where
+		DefaultAllocator: Allocator<R, C>
+}
