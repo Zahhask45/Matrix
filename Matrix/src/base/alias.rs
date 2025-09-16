@@ -1,4 +1,5 @@
 use crate::base::dimension::Dyn;
+use crate::base::vec_storage::VecStorage;
 use crate::base::{U1, U2, U3, U4, U5, U6};
 use crate::base::{ArrayStorage, Const, Matrix};
 
