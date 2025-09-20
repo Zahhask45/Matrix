@@ -35,62 +35,12 @@ where
 	}
 }
 
-impl<T, R, C, S> Add for Matrix<T, R, C, S>
-where
-	S: Add<Output = S>,
-{
-	type Output = Self;
-
-	fn add(self, other: Self) -> Self::Output{
-		Self{
-			data: self.data + other.data,
-			_phantoms: PhantomData,
-		}
-	}
-}
-
-impl<T, R, C, S> AddAssign for Matrix<T, R, C, S>
-where
-	S: AddAssign,
-{
-	fn add_assign(&mut self, rhs: Self) {
-		self.data += rhs.data;
-	}
-}
-
-impl<T, R, C, S> Sub for Matrix<T, R, C, S>
-where
-	S: Sub<Output = S>,
-{
-	type Output = Self;
-
-	fn sub(self, other: Self) -> Self::Output{
-		Self{
-			data: self.data - other.data,
-			_phantoms: PhantomData,
-		}
-	}
-}
-
-impl<T, R, C, S> SubAssign for Matrix<T, R, C, S>
-where
-	S: SubAssign,
-{
-	fn sub_assign(&mut self, rhs: Self) {
-		self.data -= rhs.data;
-	}
-}
-
-impl<T, R, C, S> Mul<T> for Matrix<T, R, C, S>
-where
-	S: Mul<T, Output = S>,
-	T: Copy,
-{
-	type Output = Self;
-
-	fn mul(self, rhs: T) -> Self::Output {
-		Self {
-			data: self.data * rhs,
+impl<T, R, C, S> Matrix<T, R, C, S> {
+	/// # Safety
+	#[inline(always)]
+	pub const unsafe fn from_data_statically_unchecked(data: S) -> Matrix<T, R, C, S> {
+		Matrix {
+			data,
 			_phantoms: PhantomData,
 		}
 	}

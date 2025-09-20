@@ -1,4 +1,7 @@
 mod array_storage;
+#[macro_use]
+mod construction;
+
 mod matrix;
 mod scalar;
 pub mod dimension;
