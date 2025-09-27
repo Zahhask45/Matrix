@@ -1,8 +1,33 @@
 use std::fmt::{self, Debug, Formatter};
-use std::ops::{Add, Sub, Mul};
+use std::ops::Mul;
+use std::mem;
+
+use crate::base::Storage;
+use crate::base::dimension::Const;
+use crate::base::storage::{IsContiguous, RawStorage};
+
+
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct ArrayStorage<T, const R: usize, const C: usize>(pub [[T; R]; C]);
+
+impl<T, const R: usize, const C: usize> ArrayStorage<T, R, C> {
+	/// Convert this array storage to a slice.
+	#[inline]
+	pub fn as_slice(&self) -> &[T] {
+		// SAFETY: this is OK because ArrayStorage is contiguous.
+		unsafe {self.as_slice_unchecked()}
+	}
+
+	/// Convert this array storage to a mutable slice.
+	#[inline]
+	pub fn as_mut_slice(&mut self) -> &mut [T] {
+		// SAFETY: this is OK because ArrayStorage is contiguous.
+		unsafe {self.as_mut_slice_unchecked()}
+	}
+}
+
+
 
 impl<T: Default, const R: usize, const C: usize> Default for ArrayStorage<T, R, C>
 where
@@ -21,21 +46,13 @@ impl<T: Debug, const R: usize, const C: usize> Debug for ArrayStorage<T, R, C>{
 	}
 }
 
-
-impl<T, const R: usize, const C: usize> Add for ArrayStorage<T, R, C>
-where
-	T: Add<Output = T> + Copy,
+unsafe impl<T, const R: usize, const C: usize> RawStorage<T, Const<R>, Const<C>>
+	for ArrayStorage<T, R, C>
 {
-	type Output = Self;
+	type RStride = Const<1>;
+	type CStride = Const<R>;
 
-	fn add(self, rhs: Self) -> Self::Output {
-		let mut result = self;
-
-		for i in 0..C{
-			for j in 0..R{
-				result.0[i][j] = self.0[i][j] + rhs.0[i][j];
-			}
-		}
-		ArrayStorage(result.0)
-	}
+	fn ptr(&self) -> *const T {}
 }
+
+unsafe impl<T, const R: usize, const C: usize> IsContiguous for ArrayStorage<T, R, C> {}
