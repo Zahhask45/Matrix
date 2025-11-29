@@ -27,6 +27,10 @@ pub unsafe trait RawStorage<T, R: Dim, C: Dim = U1>: Sized {
 	fn shape(&self) -> (R, C);
 
 	fn strides(&self) -> (Self::RStride, Self::CStride);
+
+	fn is_contiguous(&self) -> bool;
+
+	unsafe fn as_slice_unchecked(&self) -> &[T];
 }
 
 /// # Safety
@@ -42,6 +46,7 @@ pub unsafe trait Storage<T: Scalar, R: Dim, C: Dim = U1>: RawStorage<T, R, C> {
 
 	/// Drops the storage without calling the destructores on the contained elements.
 	fn forget_elements(self);
+
 }
 
 /// # Safety

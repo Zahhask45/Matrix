@@ -1,4 +1,5 @@
 pub mod allocator;
+pub mod constraint;
 pub mod default_allocator;
 pub mod dimension;
 mod ops;
@@ -10,6 +11,7 @@ mod array_storage;
 mod construction;
 mod matrix;
 mod scalar;
+
 
 mod vec_storage;
 

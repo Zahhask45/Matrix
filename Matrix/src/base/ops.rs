@@ -2,9 +2,11 @@ use std::ops::{
 	Add, AddAssign, Sub, SubAssign, Mul, MulAssign
 };
 
+use crate::base::allocator::{SameShapeAllocator};
+use crate::base::constraints::{SameNumberOfColumns, SameNumberOfRows, ShapeConstraint};
 use crate::base::storage::{Storage};
 use crate::base::dimension::{Dim, Dyn};
-use crate::base::{Matrix, Scalar};
+use crate::base::{DefaultAllocator, Matrix, Scalar};
 
 macro_rules! componentwise_binop_impl(
 	($Trait: ident, $method: ident;

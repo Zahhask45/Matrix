@@ -52,7 +52,30 @@ unsafe impl<T, const R: usize, const C: usize> RawStorage<T, Const<R>, Const<C>>
 	type RStride = Const<1>;
 	type CStride = Const<R>;
 
-	fn ptr(&self) -> *const T {}
+	#[inline]
+	fn ptr(&self) -> *const T {
+		self.0.as_ptr() as *const T
+	}
+
+	#[inline]
+	fn shape(&self) -> (Const<R>, Const<C>) {
+		(Const, Const)
+	}
+
+	#[inline]
+	fn strides(&self) -> (Self::RStride, Self::CStride) {
+		(Const, Const)
+	}
+
+	#[inline]
+	fn is_contiguous(&self) -> bool {
+		true
+	}
+
+	#[inline]
+	unsafe fn as_slice_unchecked(&self) -> &[T]{
+		unsafe { std::slice::from_raw_parts(self.ptr(), R * C) }
+	}
 }
 
 unsafe impl<T, const R: usize, const C: usize> IsContiguous for ArrayStorage<T, R, C> {}

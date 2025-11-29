@@ -4,6 +4,7 @@ use std::mem::MaybeUninit;
 
 use crate::StorageMut;
 use crate::base::dimension::{Dim, U1};
+use crate::base::constraint::{SameNumberOfRows, SameNumberOfColumns, ShapeConstrait};
 use crate::base::Scalar;
 use crate::storage::{IsContiguous, RawStorageMut};
 
@@ -24,3 +25,14 @@ pub trait Allocator<R: Dim, C: Dim = U1>: Any + Sized {
 	unsafe fn assume_init<T: Scalar>(unitit: Self::BufferUninit<T>) -> Self::Buffer<T>;
 
 }
+
+
+pub trait SameShapeAllocator<R1, C1, R2, C2>:
+	Allocator<R1, C1> + Allocator<SameShapeR<R1, R2>, SameShapeC<C1, C2>>
+where
+	R1: Dim,
+	R2: Dim,
+	C1: Dim,
+	C2: Dim,
+	ShapeConstrait: SameNumberOfRows<R1, R2> + SameNumberOfColumns<C1, C2>,
+{}
