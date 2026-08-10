@@ -3,13 +3,13 @@ use matrix::*;
 fn main() {
     let mut u = Vector::from([2., 3.]);
     let v = Vector::from([5., 7.]);
-    u.add(v);
+    u.add(&v);
     println!("{}", u);
     // [7.0]
     // [10.0]
     let mut u = Vector::from([2., 3.]);
     let v = Vector::from([5., 7.]);
-    u.sub(v);
+    u.sub(&v);
     println!("{}", u);
     // [-3.0]
     // [-4.0]
@@ -26,7 +26,7 @@ fn main() {
     [7., 4.],
     [-2., 2.]
     ]);
-    u.add(v);
+    u.add(&v);
     println!("{}", u);
     // [8.0, 6.0]
     // [1.0, 6.0]
@@ -38,7 +38,7 @@ fn main() {
     [7., 4.],
     [-2., 2.]
     ]);
-    u.sub(v);
+    u.sub(&v);
     println!("{}", u);
     // [-6.0, -2.0]
     // [5.0, 2.0]
@@ -70,7 +70,7 @@ fn main() {
         [1.5, 2.6, 4.5]
     ]);
 
-    u.add(v);
+    u.add(&v);
     println!("{}", u);
     
     

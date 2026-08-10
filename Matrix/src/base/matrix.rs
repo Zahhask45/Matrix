@@ -2,7 +2,7 @@ use std::fmt;
 use std::marker::PhantomData;
 use std::ops::{Add, Mul, Sub};
 
-use crate::base::{ArrayStorage, Const, Dim, Scalar, U1};
+use crate::base::{ArrayStorage, Const, Dim, LinearScalar, Scalar, U1, Complex};
 
 pub type Vector<T, D, S> = Matrix<T, D, U1, S>;
 
@@ -59,7 +59,7 @@ where
 	}
 
 	#[inline]
-	pub fn add(&mut self, rhs: Self)
+	pub fn add(&mut self, rhs: &Self)
 	where
 		T: Add<Output = T>,
 	{
@@ -71,7 +71,7 @@ where
 	}
 
 	#[inline]
-	pub fn sub(&mut self, rhs: Self)
+	pub fn sub(&mut self, rhs: &Self)
 	where
 		T: Sub<Output = T>,
 	{
@@ -119,6 +119,23 @@ where
 	}
 }
 
+impl<T, const R: usize> From<[(T, T); R]> for Vector<Complex<T>, Const<R>, ArrayStorage<Complex<T>, R, 1>>
+where T: Copy,
+{
+	fn from(value: [(T, T); R]) -> Self {
+		let mut data = [Complex::new(value[0].0, value[0].1); R];
+		for i in 0..R {
+			data[i] = Complex::new(value[i].0, value[i].1);
+		}
+		Matrix {
+			data: ArrayStorage([data]),
+			_phantoms: PhantomData,
+		}
+	}
+}
+
+
+
 impl<const R: usize> From<[f32; R]> for Vector<f32, Const<R>, ArrayStorage<f32, R, 1>> {
 	fn from(value: [f32; R]) -> Self {
 		Matrix {
@@ -127,6 +144,8 @@ impl<const R: usize> From<[f32; R]> for Vector<f32, Const<R>, ArrayStorage<f32, 
 		}
 	}
 }
+
+
 
 impl<const R: usize, const C: usize> From<[[f32; C]; R]>
 	for Matrix<f32, Const<R>, Const<C>, ArrayStorage<f32, R, C>>
@@ -167,3 +186,44 @@ impl<T: fmt::Display + Copy, const R: usize, const C: usize> fmt::Display
 		Ok(())
 	}
 }
+
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LinearCombinationError {
+	Empty,
+	LengthMismatch {matrices: usize, coefs: usize}
+}
+
+pub fn linear_combination<K, const R: usize, const C: usize>(
+	m: &[Matrix<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>],
+	coefs: &[K]) -> Result<Matrix<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>, LinearCombinationError>
+where
+	K: LinearScalar,
+{
+	if m.is_empty() {
+		return Err(LinearCombinationError::Empty);
+	}
+	
+	if m.len() != coefs.len(){
+		return Err(LinearCombinationError::LengthMismatch{
+			matrices: m.len(),
+			coefs: coefs.len()
+		});
+	}
+	let mut out = m[0];
+	out.scl(coefs[0]);
+
+	for idx in 1..m.len(){
+		for col in 0..C {
+			for row in 0..R {
+				let z = out.data.0[col][row];
+				let y = m[idx].data.0[col][row];
+				out.data.0[col][row] = coefs[idx].fma(y, z)
+			}
+		}
+	}
+	Ok(out)
+
+	
+}
+
