@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul};
+use std::ops::{Add, Sub, Mul, Neg};
 
 use crate::base::{LinearScalar, Scalar};
 
@@ -69,11 +69,15 @@ impl<T: Mul<f32, Output = T>> Mul<f32> for Complex<T> {
 }
 
 impl<T> LinearScalar for Complex<T> 
-where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Neg<Output = T>,
 {
 	#[inline]
 	fn fma(self, y: Self, z: Self) -> Self {
 		(self * y) + z
+	}
+
+	fn conj(self) -> Self {
+		Self::new(self.re, -self.im)
 	}
 }
 

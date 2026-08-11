@@ -289,7 +289,7 @@ where K: LinearScalar,
 	pub fn dot(&self, rhs: Vector<K, Const<R>, ArrayStorage<K, R, 1>>) -> K{
 		let mut result = K::default();
 		for row in 0..R {
-			result = result + self.data.0[0][row] * rhs.data.0[0][row];
+			result = result + self.data.0[0][row] * rhs.data.0[0][row].conj();
 		}
 		result
 	}
