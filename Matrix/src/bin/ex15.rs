@@ -68,4 +68,18 @@ fn main() {
     }
 
     println!("\n=== All Tests Executed Successfully ===");
+    
+    // ----------------------------------------------------
+    // 5. Dot Product of Real & Complex Tests
+    // ----------------------------------------------------
+    {
+        let u = Vector::from([(1.9, 50.4), (-63.9, -35.8)]);
+        let v = Vector::from([(-27.0, 10.3), (33.1, 59.4)]);
+
+        println!("{}", u.dot(v));
+    }
+
+
+
+    
 }

@@ -282,3 +282,18 @@ where V: Add<Output = V> + Mul<f32, Output = V>,
 {
 	u * (1.0 - t) + v * t
 }
+
+impl<K, const R: usize> Vector::<K, Const<R>, ArrayStorage<K, R, 1>>
+where K: LinearScalar,
+{
+	pub fn dot(&self, rhs: Vector<K, Const<R>, ArrayStorage<K, R, 1>>) -> K{
+		let mut result = K::default();
+		for row in 0..R {
+			result = result + self.data.0[0][row] * rhs.data.0[0][row];
+		}
+		result
+	}
+}
+
+
+
