@@ -44,6 +44,40 @@ impl<T, R, C, S> Matrix<T, R, C, S> {
 	}
 }
 
+impl<T, const R: usize, const C: usize> Add for Matrix<T, Const<R>, Const<C>, ArrayStorage<T, R, C>>
+where T: Scalar + Copy + Add<Output = T>,
+{
+	type Output = Self;
+	fn add(self, rhs: Self) -> Self::Output {
+		let mut result = self;
+
+		for col in 0..C {
+			for row in 0..R {
+				result.data.0[col][row] = result.data.0[col][row] + rhs.data.0[col][row];
+			}
+		}
+
+		result
+	}
+}
+
+impl<T, const R: usize, const C: usize> Mul<f32> for Matrix<T, Const<R>, Const<C>, ArrayStorage<T, R, C>>
+where T: Scalar + Copy + Mul<f32, Output = T>,
+{
+	type Output = Self;
+	fn mul(self, scalar: f32) -> Self::Output {
+		let mut result = self;
+
+		for col in 0..C {
+			for row in 0..R {
+				result.data.0[col][row] = result.data.0[col][row] * scalar;
+			}
+		}
+
+		result
+	}
+}
+
 impl<T, const R: usize, const C: usize> Matrix<T, Const<R>, Const<C>, ArrayStorage<T, R, C>>
 where
 	T: Scalar + Copy,
@@ -223,7 +257,10 @@ where
 		}
 	}
 	Ok(out)
-
-	
 }
 
+pub fn lerp<V>(u: V, v: V, t: f32) -> V
+where V: Add<Output = V> + Mul<f32, Output = V>,
+{
+	u * (1.0 - t) + v * t
+}

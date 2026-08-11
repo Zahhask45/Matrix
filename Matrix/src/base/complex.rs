@@ -15,6 +15,18 @@ impl<T> Complex<T> {
 	}
 }
 
+impl<T> Default for Complex<T>
+where T: Default
+{
+	fn default() -> Self {
+		Self {
+			re: T::default(),
+			im: T::default(),
+		}
+	}
+}
+
+
 
 impl<T> Add for Complex<T>
 where T: Copy + Add<Output = T>,
@@ -46,8 +58,18 @@ where T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 	}
 }
 
+impl<T: Mul<f32, Output = T>> Mul<f32> for Complex<T> {
+	type Output = Self;
+	fn mul(self, rhs: f32) -> Self::Output{
+		Self::new(
+			self.re * rhs, 
+			self.im * rhs
+		)
+	}
+}
+
 impl<T> LinearScalar for Complex<T> 
-where T: Scalar + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 {
 	#[inline]
 	fn fma(self, y: Self, z: Self) -> Self {

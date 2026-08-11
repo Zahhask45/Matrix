@@ -1,11 +1,11 @@
 use std::fmt::Debug;
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, Sub};
 
 pub trait Scalar: 'static + Clone + PartialEq + Debug {}
 
 impl<T: 'static + Clone + PartialEq + Debug> Scalar for T {}
 
-pub trait LinearScalar: Scalar + Copy + Add<Output = Self> + Mul<Output = Self>{
+pub trait LinearScalar: Scalar + Default + Copy + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self>{
 	fn fma(self, y: Self, z: Self) -> Self;
 }
 
