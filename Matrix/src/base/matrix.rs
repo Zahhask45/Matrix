@@ -168,8 +168,6 @@ where T: Copy,
 	}
 }
 
-
-
 impl<const R: usize> From<[f32; R]> for Vector<f32, Const<R>, ArrayStorage<f32, R, 1>> {
 	fn from(value: [f32; R]) -> Self {
 		Matrix {
@@ -193,6 +191,26 @@ impl<const R: usize, const C: usize> From<[[f32; C]; R]>
 			}
 		}
 
+		Matrix {
+			data: ArrayStorage(cols),
+			_phantoms: PhantomData,
+		}
+	}
+}
+
+
+impl<T, const R: usize, const C: usize> From<[[(T, T); C]; R]>
+	for Matrix<Complex<T>, Const<R>, Const<C>,  ArrayStorage<Complex<T>, R, C>>
+where T: Copy,
+{
+	fn from(rows: [[(T, T); C]; R]) -> Self {
+		let mut cols = [[Complex::new(rows[0][0].0, rows[0][0].1); R]; C];
+		for row in 0..R {
+			for col in 0..C {
+				cols[col][row] = Complex::new(rows[row][col].0, rows[row][col].1);
+				
+			}
+		}
 		Matrix {
 			data: ArrayStorage(cols),
 			_phantoms: PhantomData,

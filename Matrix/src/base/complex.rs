@@ -76,3 +76,10 @@ where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Outpu
 		(self * y) + z
 	}
 }
+
+impl<T: std::fmt::Display> std::fmt::Display for Complex<T> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{} + {}i", self.re, self.im)
+	}
+}
+
