@@ -1,6 +1,7 @@
 use std::fmt;
+use std::cmp::{max};
 use std::marker::PhantomData;
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul, Sub, AddAssign};
 
 use crate::base::{ArrayStorage, Const, Dim, LinearScalar, Scalar, U1, Complex};
 
@@ -295,5 +296,31 @@ where K: LinearScalar,
 	}
 }
 
+
+impl<K, const R: usize> Vector::<K, Const<R>, ArrayStorage<K, R, 1>>
+where K: LinearScalar<Real = f32>, f32: Default + AddAssign<<K as LinearScalar>::Real>
+{
+	pub fn norm_1(&self) -> f32{
+		let mut result = f32::default();
+		for row in 0..R {
+			result += self.data.0[0][row].abs();
+		}
+		result
+	}
+
+	pub fn norm(&self) -> f32{
+		self.dot(*self).abs().sqrt()
+	}
+
+	pub fn norm_inf(&self) -> f32{
+		let mut result = f32::default();
+
+		for row in 0..R {
+			result = result.max(self.data.0[0][row].abs());
+		}
+
+		result
+	}
+}
 
 
