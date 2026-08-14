@@ -324,3 +324,58 @@ where K: LinearScalar<Real = f32>, f32: Default + AddAssign<<K as LinearScalar>:
 }
 
 
+impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
+where K: LinearScalar<Real = f32>, f32: Default + AddAssign<<K as LinearScalar>::Real>
+{
+	pub fn l1_norm(&self) -> f32{
+		let mut result = f32::default();
+
+		for col in 0..C {
+			for row in 0..R {
+				result += self.data.0[col][row].abs();
+			}
+		}
+		result
+	}
+
+	pub fn norm_2_1(&self) -> f32{
+		let mut result = f32::default();
+
+		for col in 0..C {
+			let mut column = f32::default();
+
+			for row in 0..R {
+				let value = self.data.0[col][row].abs();
+
+				column += value * value;
+			}
+			result += column.sqrt();
+		}
+
+		result
+	}
+
+	pub fn norm_frobenius(&self) -> f32{
+		let mut result = f32::default();
+
+		for col in 0..C {
+			for row in 0..R {
+				let value = self.data.0[col][row].abs();
+				result += value * value;
+			}
+		}
+		result.sqrt()
+	}
+
+	pub fn inf_norm(&self) -> f32 {
+		let mut result = f32::default();
+
+		for col in 0..C {
+			for row in 0..R {
+				result = result.max(self.data.0[col][row].abs());
+			}
+		}
+		result
+	}
+	
+}
