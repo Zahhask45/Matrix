@@ -33,6 +33,15 @@ where
 	}
 }
 
+impl<K> Vector<K, Const<3>, ArrayStorage<K, 3, 1>> {
+    pub fn new(x: K, y: K, z: K) -> Self {
+        Matrix {
+            data: ArrayStorage([[x, y, z]]),
+            _phantoms: PhantomData,
+        }
+    }
+}
+
 impl<T, R, C, S> Matrix<T, R, C, S> {
 	/// # Safety
 	#[inline(always)]
@@ -386,5 +395,18 @@ where
 	K: LinearScalar<Real = f32>,
 {
 	u.dot(*v).re() / (u.norm() * v.norm())
+}
+
+pub fn cross_product<K>(
+	u: &Vector<K, Const<3>, ArrayStorage<K, 3, 1>>,
+	v: &Vector<K, Const<3>, ArrayStorage<K, 3, 1>>) -> Vector<K, Const<3>, ArrayStorage<K, 3, 1>>
+where
+	K: LinearScalar,
+{
+	Vector::new(
+		u.data.0[0][1] * v.data.0[0][2] - u.data.0[0][2] * v.data.0[0][1],
+		u.data.0[0][2] * v.data.0[0][0] - u.data.0[0][0] * v.data.0[0][2],
+		u.data.0[0][0] * v.data.0[0][1] - u.data.0[0][1] * v.data.0[0][0],
+	)
 }
 
