@@ -106,6 +106,10 @@ where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Outpu
 	fn abs(self) -> T {
 		(self.re * self.re + self.im * self.im).sqrt()
 	}
+
+	fn re(self) -> T {
+		self.re
+	}
 }
 
 impl<T: std::fmt::Display> std::fmt::Display for Complex<T> {

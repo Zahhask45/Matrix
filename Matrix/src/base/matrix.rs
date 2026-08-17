@@ -1,5 +1,4 @@
 use std::fmt;
-use std::cmp::{max};
 use std::marker::PhantomData;
 use std::ops::{Add, Mul, Sub, AddAssign};
 
@@ -379,3 +378,13 @@ where K: LinearScalar<Real = f32>, f32: Default + AddAssign<<K as LinearScalar>:
 	}
 	
 }
+
+pub fn angle_cos<K, const R: usize>(
+	u: &Vector<K, Const<R>, ArrayStorage<K, R, 1>>,
+	v: &Vector<K, Const<R>, ArrayStorage<K, R, 1>>) -> f32
+where
+	K: LinearScalar<Real = f32>,
+{
+	u.dot(*v).re() / (u.norm() * v.norm())
+}
+

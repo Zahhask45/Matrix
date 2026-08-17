@@ -21,6 +21,7 @@ where Self::Real: LinearScalar,
 	fn conj(self) -> Self;
 	fn sqrt(self) -> Self;
 	fn abs(self) -> Self::Real;
+	fn re(self) -> Self::Real;
 }
 
 impl LinearScalar for f32 {
@@ -56,6 +57,10 @@ impl LinearScalar for f32 {
 		if self < 0.0{
 			return -self;
 		}
+		self
+	}
+
+	fn re(self) -> Self::Real {
 		self
 	}
 }

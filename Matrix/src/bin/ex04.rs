@@ -1,4 +1,4 @@
-use matrix::{Complex, Vector, Matrix};
+use matrix::{ Vector, Matrix};
 
 
 fn main() {
