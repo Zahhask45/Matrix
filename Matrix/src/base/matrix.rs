@@ -18,9 +18,9 @@ impl<T, R: Dim, C: Dim, S: fmt::Debug> fmt::Debug for Matrix<T, R, C, S> {
 	}
 }
 
-impl<T, R, C, S> Default for Matrix<T, R, C, S>
+impl<K, R, C, S> Default for Matrix<K, R, C, S>
 where
-	T: Scalar,
+	K: LinearScalar,
 	R: Dim,
 	C: Dim,
 	S: Default,
@@ -50,6 +50,51 @@ impl<T, R, C, S> Matrix<T, R, C, S> {
 			data,
 			_phantoms: PhantomData,
 		}
+	}
+}
+
+impl<K, const D: usize> Matrix<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
+where K: LinearScalar {
+	pub fn identity() -> Self {
+		let mut result = Matrix {
+			data: ArrayStorage([[K::default();D]; D]),
+			_phantoms: PhantomData,
+		};
+
+		for i in 0..D {
+			result.data.0[i][i] = K::one();
+		}
+
+		result
+	}
+}
+
+impl<K, const R: usize, const C: usize> Matrix<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
+where K: LinearScalar {
+	pub fn diagonal<const D: usize>(values: [K; D]) -> Self {
+		assert!(D <= R.min(C));
+		let mut result = Matrix {
+		    data: ArrayStorage([[K::default(); R]; C]),
+		    _phantoms: PhantomData,
+		};
+		for idx in 0..D {
+			result.data.0[idx][idx] = values[idx];
+		}
+
+		result
+	}
+
+	pub fn to_diagonal(&self) -> Self {
+		let mut result = Matrix {
+		    data: ArrayStorage([[K::default(); R]; C]),
+		    _phantoms: PhantomData,
+		};
+
+		for idx in 0..R.min(C) {
+			result.data.0[idx][idx] = self.data.0[idx][idx];
+		}
+
+		result
 	}
 }
 
@@ -163,10 +208,10 @@ where
 }
 
 impl<T, const R: usize> From<[(T, T); R]> for Vector<Complex<T>, Const<R>, ArrayStorage<Complex<T>, R, 1>>
-where T: Copy,
+where T: Copy + Default,
 {
 	fn from(value: [(T, T); R]) -> Self {
-		let mut data = [Complex::new(value[0].0, value[0].1); R];
+		let mut data = [Complex::default(); R];
 		for i in 0..R {
 			data[i] = Complex::new(value[i].0, value[i].1);
 		}
@@ -210,10 +255,10 @@ impl<const R: usize, const C: usize> From<[[f32; C]; R]>
 
 impl<T, const R: usize, const C: usize> From<[[(T, T); C]; R]>
 	for Matrix<Complex<T>, Const<R>, Const<C>,  ArrayStorage<Complex<T>, R, C>>
-where T: Copy,
+where T: Copy + Default,
 {
 	fn from(rows: [[(T, T); C]; R]) -> Self {
-		let mut cols = [[Complex::new(rows[0][0].0, rows[0][0].1); R]; C];
+		let mut cols = [[Complex::default(); R]; C];
 		for row in 0..R {
 			for col in 0..C {
 				cols[col][row] = Complex::new(rows[row][col].0, rows[row][col].1);
@@ -410,3 +455,44 @@ where
 	)
 }
 
+impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
+where K: LinearScalar
+{
+	pub fn mul_vec(&self, vec: &Vector<K, Const<C>, ArrayStorage<K, C, 1>>) -> Vector<K, Const<R>, ArrayStorage<K, R, 1>>
+	{
+		let mut result = Vector {
+		    data: ArrayStorage([[K::default(); R]]),
+		    _phantoms: PhantomData,
+		};
+		
+		for row in 0..R {
+			let mut sum = K::default();
+			for col in 0..C {
+				sum = self.data.0[col][row].fma(vec.data.0[0][col], sum);
+			}
+			result.data.0[0][row] = sum;
+		}
+		result
+	}
+
+	pub fn mul_mat<const P: usize>(&self,
+		mat: &Matrix<K, Const<C>, Const<P>, ArrayStorage<K, C, P>>) -> Matrix::<K, Const<R>, Const<P>, ArrayStorage<K, R, P>> {
+		let mut result = Matrix {
+		    data: ArrayStorage([[K::default(); R]; P]),
+		    _phantoms: PhantomData,
+		};
+
+        for row in 0..R {
+			for col in 0..P {
+            	let mut sum = K::default();
+            	
+            	for k in 0..C {
+	            	sum = self.data.0[k][row].fma(mat.data.0[col][k], sum);
+            	}
+				result.data.0[col][row] = sum;
+	        }
+	    } 
+
+		result
+	}
+}

@@ -39,9 +39,9 @@ impl<T, const R: usize, const C: usize> ArrayStorage<T, R, C> {
 
 
 
-impl<T: Default, const R: usize, const C: usize> Default for ArrayStorage<T, R, C>
+impl<K: Default, const R: usize, const C: usize> Default for ArrayStorage<K, R, C>
 where
-	[[T; R]; C]: Default,
+	[[K; R]; C]: Default,
 {
 	#[inline]
 	fn default() -> Self {

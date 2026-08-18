@@ -34,9 +34,18 @@ impl LinearScalar for f32 {
 		self
 	}
 	fn sqrt(self) -> Self {
+		if self.is_nan(){
+			return f32::NAN;
+		}
+		
 		if self < 0.0 {
 			return f32::NAN;
 		}
+		
+		if self.is_infinite() {
+	        return f32::INFINITY;
+	    }
+	    
 		if self == 0.0 {
 			return 0.0;
 		}
