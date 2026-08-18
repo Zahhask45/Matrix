@@ -496,3 +496,37 @@ where K: LinearScalar
 		result
 	}
 }
+
+impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
+where K: LinearScalar
+{
+	pub fn trace(&self) -> K{
+		let mut result = K::default();
+
+		for idx in 0..D {
+			result = result + self.data.0[idx][idx];
+		}
+
+		result
+	}
+}
+
+impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
+where K: LinearScalar
+{
+	pub fn transpose(&self) ->  Matrix::<K, Const<C>, Const<R>, ArrayStorage<K, C, R>>{
+		let mut result = Matrix {
+		    data: ArrayStorage([[K::default(); C]; R]),
+		    _phantoms: PhantomData,
+		};
+
+		for col in 0..C {
+			for row in 0..R {
+				result.data.0[row][col] = self.data.0[col][row];
+			}
+		}
+
+		result
+		
+	}
+}
