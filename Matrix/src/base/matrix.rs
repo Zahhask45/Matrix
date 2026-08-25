@@ -570,6 +570,19 @@ where K: LinearScalar
 				}
 			}
 
+			// subtract by other row ex: r2 - xr1 || check by col row
+			for row_id in 0..R{
+				if row_id == row_pivot {
+					continue;
+				}
+				if result.data.0[col_pivot][row_id] != K::zero(){
+					let scalar = result.data.0[col_pivot][row_id];
+					for col_id in col_pivot..C{
+						result.data.0[col_id][row_id] = result.data.0[col_id][row_id] - (scalar * result.data.0[col_id][row_pivot]);
+					}
+				}
+			}
+
 
 			row_pivot = row + 1;
 			col_pivot += 1;
