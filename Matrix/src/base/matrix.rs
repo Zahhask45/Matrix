@@ -526,7 +526,55 @@ where K: LinearScalar
 			}
 		}
 
-		result
+		result	
+	}
+
+	pub fn row_echelon(&self) -> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>{
+		let mut result = *self;
+
+		let mut row_pivot = 0;
+		let mut col_pivot = 0;
+
+		while row_pivot != R || col_pivot != C{
+			let mut row = row_pivot;
+			let mut col = col_pivot;
+
+
+			// find the pivot value improve to find highest or K::one()
+			'pivot: loop{
+				for col_id in col_pivot..C{
+					for row_id in row_pivot..R{
+						if result.data.0[col_id][row_id] != K::zero(){
+							row = row_id;
+							col_pivot = col_id;
+							break 'pivot;
+						}
+					}
+				}
+				return result;
+			}
+
+			//swap lines if needed
+
+			if row != row_pivot {
+				for col_id in 0..C {
+					(result.data.0[col_id][row_pivot], result.data.0[col_id][row]) = (result.data.0[col_id][row], result.data.0[col_id][row_pivot]);
+				}
+			}
 		
+			// normilize row if pivot != 1
+			if result.data.0[col_pivot][row_pivot] != K::one(){
+				let scalar = result.data.0[col_pivot][row_pivot];
+				for col_id in 0..C{
+					result.data.0[col_id][row_pivot] = result.data.0[col_id][row_pivot] * (K::one() / scalar);
+				}
+			}
+
+
+			row_pivot = row + 1;
+			col_pivot += 1;
+		}
+
+		result
 	}
 }

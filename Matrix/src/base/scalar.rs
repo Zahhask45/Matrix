@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul, Sub, Div};
 
 pub trait Scalar: 'static + Clone + PartialEq + PartialOrd + Debug {
 	fn zero() -> Self;
@@ -12,7 +12,7 @@ impl Scalar for f32 {
 	fn one() -> Self{ 1.0}
 }
 
-pub trait LinearScalar: Scalar + Default + Copy + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self>
+pub trait LinearScalar: Scalar + Default + Copy + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Div<Output = Self>
 where Self::Real: LinearScalar,
 {
 	type Real;

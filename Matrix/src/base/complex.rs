@@ -76,6 +76,31 @@ impl<T: Mul<f32, Output = T>> Mul<f32> for Complex<T> {
 	}
 }
 
+impl<T> Div for Complex<T>
+where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Neg<Output = T> + Div<Output = T> + LinearScalar,
+{
+	type Output = Self;
+	fn div(self, rhs: Self) -> Self::Output{
+		let denominator = rhs.re * rhs.re + rhs.im * rhs.im;
+	    let numerator = self * rhs.conj();
+	
+	    Self::new(
+	        numerator.re / denominator,
+	        numerator.im / denominator,
+	    )
+	}
+}
+
+impl<T: Div<f32, Output = T>> Div<f32> for Complex<T> {
+	type Output = Self;
+	fn div(self, rhs: f32) -> Self::Output{
+		Self::new(
+			self.re / rhs, 
+			self.im / rhs
+		)
+	}
+}
+
 impl<T> LinearScalar for Complex<T> 
 where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Neg<Output = T> + Div<Output = T> + LinearScalar,
 {
