@@ -207,6 +207,29 @@ where
 	}
 }
 
+impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
+where K: LinearScalar<Real = f32>
+{
+	pub fn is_identity(&self) -> bool{
+		let epsilon = 0.0001;
+		for row in 0..D {
+	        for col in 0..D {
+	            let expected = if row == col {
+	                K::one()
+	            } else {
+	                K::zero()
+	            };
+
+	            if (self.data.0[col][row] - expected).abs() > epsilon {
+	                return false;
+	            }
+	        }
+	    }
+
+	    true
+	}
+}
+
 impl<T, const R: usize> From<[(T, T); R]> for Vector<Complex<T>, Const<R>, ArrayStorage<Complex<T>, R, 1>>
 where T: Copy + Default,
 {
@@ -511,6 +534,8 @@ where K: LinearScalar
 	}
 }
 
+
+
 impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
 where K: LinearScalar + Neg<Output = K>
 {
@@ -528,6 +553,102 @@ where K: LinearScalar + Neg<Output = K>
 		}
 
 		result
+	}
+
+}
+
+
+#[derive(Debug)]
+pub enum InverseError {
+    SingularMatrix,
+}
+
+
+impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
+where K: LinearScalar<Real = f32>
+{
+	pub fn inverse(&self) -> Result<Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>, InverseError>{
+		let mut to_identity = *self;
+		let mut identity = Matrix::identity();
+		
+		let mut row_pivot = 0;
+		let mut col_pivot = 0;
+
+		while row_pivot < D && col_pivot < D{
+			let mut pivot = None;
+
+			// find the pivot value improve to find highest or K::one()
+			'pivot: for col_id in col_pivot..D{
+				let mut best_row:Option<(usize, K)> = None;
+			
+				for row_id in row_pivot..D{
+					if to_identity.data.0[col_id][row_id] != K::zero(){
+						let value = to_identity.data.0[col_id][row_id];
+
+						match best_row {
+							None => { best_row = Some((row_id, value)); }
+							Some((_, current)) => {
+								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
+									best_row = Some((row_id, value));
+								}
+							}
+						}
+					}
+				}
+
+				if let Some((row, value)) = best_row {
+					pivot = Some((col_id, row, value));
+					break 'pivot;
+				}
+			}
+
+			let (col, row, _) = match pivot {
+				Some(pivot) => pivot,
+				None => return Err(InverseError::SingularMatrix),
+			};
+
+			col_pivot = col;
+
+			//swap lines if needed
+
+			if row != row_pivot {
+				for col_id in 0..D {
+					(to_identity.data.0[col_id][row_pivot], to_identity.data.0[col_id][row]) = (to_identity.data.0[col_id][row], to_identity.data.0[col_id][row_pivot]);
+					(identity.data.0[col_id][row_pivot], identity.data.0[col_id][row]) = (identity.data.0[col_id][row], identity.data.0[col_id][row_pivot]);
+				}
+			}
+		
+			// normilize row if pivot != 1
+			if to_identity.data.0[col_pivot][row_pivot] != K::one(){
+				let scalar = to_identity.data.0[col_pivot][row_pivot];
+				for col_id in 0..D{
+					to_identity.data.0[col_id][row_pivot] = to_identity.data.0[col_id][row_pivot] * (K::one() / scalar);
+					identity.data.0[col_id][row_pivot] = identity.data.0[col_id][row_pivot] * (K::one() / scalar);
+				}
+			}
+
+			// subtract by other row ex: r2 - xr1 || check by col row
+			for row_id in 0..D{
+				if row_id == row_pivot {
+					continue;
+				}
+				if to_identity.data.0[col_pivot][row_id] != K::zero(){
+					let scalar = to_identity.data.0[col_pivot][row_id];
+					for col_id in 0..D{
+						to_identity.data.0[col_id][row_id] = to_identity.data.0[col_id][row_id] - (scalar * to_identity.data.0[col_id][row_pivot]);
+						identity.data.0[col_id][row_id] = identity.data.0[col_id][row_id] - (scalar * identity.data.0[col_id][row_pivot]);
+					}
+				}
+			}
+
+
+			row_pivot += 1;
+			col_pivot += 1;
+		}
+		if to_identity.is_identity(){
+			return Ok(identity)
+		}
+		Err(InverseError::SingularMatrix)
 	}
 }
 
