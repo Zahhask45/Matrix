@@ -509,6 +509,15 @@ where K: LinearScalar
 
 		result
 	}
+
+	pub fn determinant(&self) -> K{
+		let result = K::default();
+		let (gaussian, swap_count) = self.gaussian_elimination();
+
+
+
+		result
+	}
 }
 
 impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
@@ -535,7 +544,7 @@ where K: LinearScalar
 		let mut row_pivot = 0;
 		let mut col_pivot = 0;
 
-		while row_pivot != R || col_pivot != C{
+		while row_pivot < R && col_pivot < C{
 			let mut pivot = None;
 
 			// find the pivot value improve to find highest or K::one()
@@ -550,7 +559,7 @@ where K: LinearScalar
 							None => { best_row = Some((row_id, value)); }
 							Some((_, current)) => {
 								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
-									best_row = Some((row_id, current));
+									best_row = Some((row_id, value));
 								}
 							}
 						}
@@ -605,5 +614,76 @@ where K: LinearScalar
 		}
 
 		result
+	}
+
+	fn gaussian_elimination(&self) -> (Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>, u32){
+		let mut result = *self;
+		let mut swap_count = 0;
+		
+		let mut row_pivot = 0;
+		let mut col_pivot = 0;
+
+		while row_pivot < R && col_pivot < C{
+			let mut pivot = None;
+
+			// find the pivot value improve to find highest or K::one()
+			'pivot: for col_id in col_pivot..C{
+				let mut best_row:Option<(usize, K)> = None;
+			
+				for row_id in row_pivot..R{
+					if result.data.0[col_id][row_id] != K::zero(){
+						let value = result.data.0[col_id][row_id];
+
+						match best_row {
+							None => { best_row = Some((row_id, value)); }
+							Some((_, current)) => {
+								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
+									best_row = Some((row_id, value));
+								}
+							}
+						}
+					}
+				}
+
+				if let Some((row, value)) = best_row {
+					pivot = Some((col_id, row, value));
+					break 'pivot;
+				}
+			}
+
+			let (col, row, _) = match pivot {
+				Some(pivot) => pivot,
+				None => return (result, swap_count),
+			};
+
+			col_pivot = col;
+
+			//swap lines if needed
+
+			if row != row_pivot {
+				swap_count += 1;
+				for col_id in 0..C {
+					(result.data.0[col_id][row_pivot], result.data.0[col_id][row]) = (result.data.0[col_id][row], result.data.0[col_id][row_pivot]);
+				}
+			}
+
+			// subtract by other row ex: r2 - xr1 || check by col row
+			let pivot_value = result.data.0[col_pivot][row_pivot];
+			
+			for row_id in row_pivot+1..R{
+				if result.data.0[col_pivot][row_id] != K::zero(){
+					let scalar = result.data.0[col_pivot][row_id] / pivot_value;
+					for col_id in col_pivot..C{
+						result.data.0[col_id][row_id] = result.data.0[col_id][row_id] - (scalar * result.data.0[col_id][row_pivot]);
+					}
+				}
+			}
+
+
+			row_pivot = row + 1;
+			col_pivot += 1;
+		}
+
+		(result, swap_count)
 	}
 }
