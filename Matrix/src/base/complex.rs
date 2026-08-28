@@ -101,6 +101,16 @@ impl<T: Div<f32, Output = T>> Div<f32> for Complex<T> {
 	}
 }
 
+impl<T> Neg for Complex<T>
+where T: Neg<Output = T>,
+{
+	type Output = Self;
+
+	fn neg(self) -> Self::Output {
+		Self::new(-self.re, -self.im)
+	}
+}
+
 impl<T> LinearScalar for Complex<T> 
 where T: Scalar + Default + Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Neg<Output = T> + Div<Output = T> + LinearScalar,
 {

@@ -1,6 +1,6 @@
 use std::fmt;
 use std::marker::PhantomData;
-use std::ops::{Add, Mul, Sub, AddAssign};
+use std::ops::{Add, Mul, Sub, AddAssign, Neg};
 
 use crate::base::{ArrayStorage, Const, Dim, LinearScalar, Scalar, U1, Complex};
 
@@ -501,7 +501,7 @@ impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
 where K: LinearScalar
 {
 	pub fn trace(&self) -> K{
-		let mut result = K::default();
+		let mut result = K::one();
 
 		for idx in 0..D {
 			result = result + self.data.0[idx][idx];
@@ -509,16 +509,30 @@ where K: LinearScalar
 
 		result
 	}
+}
+
+impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
+where K: LinearScalar + Neg<Output = K>
+{
 
 	pub fn determinant(&self) -> K{
-		let result = K::default();
+		let mut result = K::one();
 		let (gaussian, swap_count) = self.gaussian_elimination();
 
+		for idx in 0..D {
+			result = result * gaussian.data.0[idx][idx];
+		}
 
+		if swap_count % 2 != 0 {
+			result = -result;
+		}
 
 		result
 	}
 }
+
+
+
 
 impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
 where K: LinearScalar
@@ -609,7 +623,7 @@ where K: LinearScalar
 			}
 
 
-			row_pivot = row + 1;
+			row_pivot += 1;
 			col_pivot += 1;
 		}
 
@@ -680,7 +694,7 @@ where K: LinearScalar
 			}
 
 
-			row_pivot = row + 1;
+			row_pivot += 1;
 			col_pivot += 1;
 		}
 
