@@ -536,23 +536,39 @@ where K: LinearScalar
 		let mut col_pivot = 0;
 
 		while row_pivot != R || col_pivot != C{
-			let mut row = row_pivot;
-			let mut col = col_pivot;
-
+			let mut pivot = None;
 
 			// find the pivot value improve to find highest or K::one()
-			'pivot: loop{
-				for col_id in col_pivot..C{
-					for row_id in row_pivot..R{
-						if result.data.0[col_id][row_id] != K::zero(){
-							row = row_id;
-							col_pivot = col_id;
-							break 'pivot;
+			'pivot: for col_id in col_pivot..C{
+				let mut best_row:Option<(usize, K)> = None;
+			
+				for row_id in row_pivot..R{
+					if result.data.0[col_id][row_id] != K::zero(){
+						let value = result.data.0[col_id][row_id];
+
+						match best_row {
+							None => { best_row = Some((row_id, value)); }
+							Some((_, current)) => {
+								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
+									best_row = Some((row_id, current));
+								}
+							}
 						}
 					}
 				}
-				return result;
+
+				if let Some((row, value)) = best_row {
+					pivot = Some((col_id, row, value));
+					break 'pivot;
+				}
 			}
+
+			let (col, row, _) = match pivot {
+				Some(pivot) => pivot,
+				None => return result,
+			};
+
+			col_pivot = col;
 
 			//swap lines if needed
 
