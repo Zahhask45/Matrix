@@ -575,34 +575,8 @@ where K: LinearScalar<Real = f32>
 		let mut col_pivot = 0;
 
 		while row_pivot < D && col_pivot < D{
-			let mut pivot = None;
 
-			// find the pivot value improve to find highest or K::one()
-			'pivot: for col_id in col_pivot..D{
-				let mut best_row:Option<(usize, K)> = None;
-			
-				for row_id in row_pivot..D{
-					if to_identity.data.0[col_id][row_id] != K::zero(){
-						let value = to_identity.data.0[col_id][row_id];
-
-						match best_row {
-							None => { best_row = Some((row_id, value)); }
-							Some((_, current)) => {
-								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
-									best_row = Some((row_id, value));
-								}
-							}
-						}
-					}
-				}
-
-				if let Some((row, value)) = best_row {
-					pivot = Some((col_id, row, value));
-					break 'pivot;
-				}
-			}
-
-			let (col, row, _) = match pivot {
+			let (col, row, _) = match to_identity.find_pivot(col_pivot, row_pivot) {
 				Some(pivot) => pivot,
 				None => return Err(InverseError::SingularMatrix),
 			};
@@ -673,6 +647,35 @@ where K: LinearScalar
 		result	
 	}
 
+	fn find_pivot(&self, col_pivot: usize, row_pivot: usize) -> Option<(usize, usize, K)>{
+		for col in col_pivot..C {
+	        let mut best_row: Option<(usize, K)> = None;
+	
+	        for row in row_pivot..R {
+	            let value = self.data.0[col][row];
+	
+	            if value != K::zero() {
+	                match best_row {
+	                    None => {
+	                        best_row = Some((row, value));
+	                    }
+	                    Some((_, current)) => {
+	                        if value.abs().partial_cmp(&current.abs()).unwrap().is_gt() {
+	                            best_row = Some((row, value));
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	
+	        if let Some((row, value)) = best_row {
+	            return Some((col, row, value));
+	        }
+	    }
+	
+	    None
+	}
+
 	pub fn row_echelon(&self) -> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>{
 		let mut result = *self;
 
@@ -680,34 +683,9 @@ where K: LinearScalar
 		let mut col_pivot = 0;
 
 		while row_pivot < R && col_pivot < C{
-			let mut pivot = None;
 
 			// find the pivot value improve to find highest or K::one()
-			'pivot: for col_id in col_pivot..C{
-				let mut best_row:Option<(usize, K)> = None;
-			
-				for row_id in row_pivot..R{
-					if result.data.0[col_id][row_id] != K::zero(){
-						let value = result.data.0[col_id][row_id];
-
-						match best_row {
-							None => { best_row = Some((row_id, value)); }
-							Some((_, current)) => {
-								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
-									best_row = Some((row_id, value));
-								}
-							}
-						}
-					}
-				}
-
-				if let Some((row, value)) = best_row {
-					pivot = Some((col_id, row, value));
-					break 'pivot;
-				}
-			}
-
-			let (col, row, _) = match pivot {
+			let (col, row, _) = match result.find_pivot(col_pivot, row_pivot) {
 				Some(pivot) => pivot,
 				None => return result,
 			};
@@ -759,34 +737,8 @@ where K: LinearScalar
 		let mut col_pivot = 0;
 
 		while row_pivot < R && col_pivot < C{
-			let mut pivot = None;
 
-			// find the pivot value improve to find highest or K::one()
-			'pivot: for col_id in col_pivot..C{
-				let mut best_row:Option<(usize, K)> = None;
-			
-				for row_id in row_pivot..R{
-					if result.data.0[col_id][row_id] != K::zero(){
-						let value = result.data.0[col_id][row_id];
-
-						match best_row {
-							None => { best_row = Some((row_id, value)); }
-							Some((_, current)) => {
-								if value.abs().partial_cmp(&current.abs()).unwrap().is_gt(){
-									best_row = Some((row_id, value));
-								}
-							}
-						}
-					}
-				}
-
-				if let Some((row, value)) = best_row {
-					pivot = Some((col_id, row, value));
-					break 'pivot;
-				}
-			}
-
-			let (col, row, _) = match pivot {
+			let (col, row, _) = match result.find_pivot(col_pivot, row_pivot) {
 				Some(pivot) => pivot,
 				None => return (result, swap_count),
 			};
@@ -820,5 +772,24 @@ where K: LinearScalar
 		}
 
 		(result, swap_count)
+	}
+
+	fn is_non_zero_row(&self, row: usize) -> bool{
+		for col in 0..C{
+			if self.data.0[col][row] != K::zero() { return true}
+		}
+
+		false
+	}
+
+	pub fn rank(&self) -> usize{
+		let mut rank: usize = 0;
+		let (matrix, _) = self.gaussian_elimination();
+
+		for row in 0..R{
+			if matrix.is_non_zero_row(row) { rank += 1; }
+		}
+
+		rank
 	}
 }
