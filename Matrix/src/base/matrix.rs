@@ -793,3 +793,44 @@ where K: LinearScalar
 		rank
 	}
 }
+
+impl Matrix::<f32, Const<4>, Const<4>, ArrayStorage<f32, 4, 4>>
+{
+	pub fn projection(fov: f32, ratio: f32, near: f32, far: f32) -> Self{
+	    let mut result = Self {
+   		    data: ArrayStorage([[0.; 4]; 4]),
+   		    _phantoms: PhantomData,
+   		};
+	
+	    let tan_half_fov = (fov / 2.).tan();
+	
+	    result.data.0[0][0] = 1. / (ratio * tan_half_fov);
+	    result.data.0[1][1] = 1. / tan_half_fov;
+	    
+	    // Z: [0, 1] NDC
+		result.data.0[2][2] = -far / (far - near);
+		result.data.0[3][2] = -(far * near) / (far - near);
+		
+		result.data.0[2][3] = -1.;
+	
+	    result
+	}
+}
+
+impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
+where K: LinearScalar + fmt::Display,
+{
+	pub fn print_col_major(&self){
+		for col in 0..C {
+			for row in 0..R {
+				print!("{}", self.data.0[col][row]);
+				if row + 1 < R {
+					print!(", ");
+				}
+			}
+			if col + 1 < C {
+				println!();
+			}
+		}
+	}
+}
