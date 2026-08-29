@@ -26,6 +26,18 @@ fn main() {
     p.print_col_major();
     println!();
 
+    // 45° FOV, 16:9 window
+    let p = Matrix::<f32, Const<4>, Const<4>, ArrayStorage<f32, 4, 4>>::projection(
+        45.0_f32.to_radians(),
+        16.0 / 9.0,
+        0.1,
+        100.0,
+    );
+
+    println!("45° FOV, ratio 16:9:");
+    p.print_col_major();
+    println!();
+
 
     // 60° FOV, 16:9 window
     let p = Matrix::<f32, Const<4>, Const<4>, ArrayStorage<f32, 4, 4>>::projection(

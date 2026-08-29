@@ -834,3 +834,54 @@ where K: LinearScalar + fmt::Display,
 		}
 	}
 }
+
+#[derive(Debug)]
+pub enum PseudoInverseError {
+    Inverse(InverseError),
+}
+
+impl From<InverseError> for PseudoInverseError {
+    fn from(error: InverseError) -> Self {
+        PseudoInverseError::Inverse(error)
+    }
+}
+
+impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
+where K: LinearScalar<Real = f32>
+{
+	fn conj_transpose(&self) ->  Matrix::<K, Const<C>, Const<R>, ArrayStorage<K, C, R>>{
+			let mut result = Matrix {
+			    data: ArrayStorage([[K::default(); C]; R]),
+			    _phantoms: PhantomData,
+			};
+	
+			for col in 0..C {
+				for row in 0..R {
+					result.data.0[row][col] = self.data.0[col][row].conj();
+				}
+			}
+	
+			result	
+		}
+	pub fn pseudo_inverse(&self) -> Result<Matrix::<K, Const<C>, Const<R>, ArrayStorage<K, C, R>>, PseudoInverseError>{
+		if R >= C {
+			let at = self.conj_transpose();
+			let b = at.mul_mat(self);
+			let b_inverse = b.inverse()?;
+			let pseudo = b_inverse.mul_mat(&at);
+
+			Ok(pseudo)
+		}
+		else {
+			let at = self.conj_transpose();
+			let b = self.mul_mat(&at);
+			let b_inverse = b.inverse()?;
+			let pseudo = at.mul_mat(&b_inverse);
+
+			Ok(pseudo)
+		}
+	}
+}
+
+
+
