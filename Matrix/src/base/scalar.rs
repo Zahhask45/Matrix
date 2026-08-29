@@ -4,12 +4,14 @@ use std::ops::{Add, Mul, Sub, Div};
 pub trait Scalar: 'static + Clone + PartialEq + PartialOrd + Debug {
 	fn zero() -> Self;
 	fn one() -> Self;
+	fn epsilon() -> Self;
 }
 
 
 impl Scalar for f32 {
-	fn zero() -> Self{ 0.0}
-	fn one() -> Self{ 1.0}
+	fn zero() -> Self{ 0.0 }
+	fn one() -> Self{ 1.0 }
+	fn epsilon() -> Self{ 1e-5 }
 }
 
 pub trait LinearScalar: Scalar + Default + Copy + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Div<Output = Self>

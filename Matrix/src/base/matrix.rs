@@ -4,6 +4,8 @@ use std::ops::{Add, Mul, Sub, AddAssign, Neg};
 
 use crate::base::{ArrayStorage, Const, Dim, LinearScalar, Scalar, U1, Complex};
 
+const EPSILON: f32 = 1e-5;
+
 pub type Vector<T, D, S> = Matrix<T, D, U1, S>;
 
 #[derive(Clone, Copy)]
@@ -524,7 +526,7 @@ impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
 where K: LinearScalar
 {
 	pub fn trace(&self) -> K{
-		let mut result = K::one();
+		let mut result = K::zero();
 
 		for idx in 0..D {
 			result = result + self.data.0[idx][idx];
@@ -630,7 +632,7 @@ where K: LinearScalar<Real = f32>
 
 
 impl<K, const R: usize, const C: usize> Matrix::<K, Const<R>, Const<C>, ArrayStorage<K, R, C>>
-where K: LinearScalar
+where K: LinearScalar<Real = f32>
 {
 	pub fn transpose(&self) ->  Matrix::<K, Const<C>, Const<R>, ArrayStorage<K, C, R>>{
 		let mut result = Matrix {
@@ -654,7 +656,7 @@ where K: LinearScalar
 	        for row in row_pivot..R {
 	            let value = self.data.0[col][row];
 	
-	            if value != K::zero() {
+	            if value.abs() > EPSILON {
 	                match best_row {
 	                    None => {
 	                        best_row = Some((row, value));
@@ -758,7 +760,7 @@ where K: LinearScalar
 			let pivot_value = result.data.0[col_pivot][row_pivot];
 			
 			for row_id in row_pivot+1..R{
-				if result.data.0[col_pivot][row_id] != K::zero(){
+				if result.data.0[col_pivot][row_id].abs() > EPSILON{
 					let scalar = result.data.0[col_pivot][row_id] / pivot_value;
 					for col_id in col_pivot..C{
 						result.data.0[col_id][row_id] = result.data.0[col_id][row_id] - (scalar * result.data.0[col_id][row_pivot]);
@@ -776,7 +778,7 @@ where K: LinearScalar
 
 	fn is_non_zero_row(&self, row: usize) -> bool{
 		for col in 0..C{
-			if self.data.0[col][row] != K::zero() { return true}
+			if self.data.0[col][row].abs() > EPSILON { return true }
 		}
 
 		false

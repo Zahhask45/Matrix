@@ -20,6 +20,7 @@ where T: Scalar,
 {
 	fn zero() -> Self{ Self::new(T::zero(),T::zero()) }
 	fn one() -> Self{ Self::new(T::one(), T::zero()) }
+	fn epsilon() -> Self{ Self::new(T::epsilon(), T::zero()) }
 }
 
 
