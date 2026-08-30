@@ -79,8 +79,8 @@ where K: LinearScalar {
 		    data: ArrayStorage([[K::default(); R]; C]),
 		    _phantoms: PhantomData,
 		};
-		for idx in 0..D {
-			result.data.0[idx][idx] = values[idx];
+		for (idx, &value) in values.iter().enumerate() {
+			result.data.0[idx][idx] = value;
 		}
 
 		result
@@ -539,7 +539,7 @@ where K: LinearScalar
 
 
 impl<K, const D: usize> Matrix::<K, Const<D>, Const<D>, ArrayStorage<K, D, D>>
-where K: LinearScalar + Neg<Output = K>
+where K: LinearScalar<Real = f32> + Neg<Output = K>
 {
 
 	pub fn determinant(&self) -> K{
@@ -608,7 +608,7 @@ where K: LinearScalar<Real = f32>
 				if row_id == row_pivot {
 					continue;
 				}
-				if to_identity.data.0[col_pivot][row_id] != K::zero(){
+				if to_identity.data.0[col_pivot][row_id].abs() > EPSILON{
 					let scalar = to_identity.data.0[col_pivot][row_id];
 					for col_id in 0..D{
 						to_identity.data.0[col_id][row_id] = to_identity.data.0[col_id][row_id] - (scalar * to_identity.data.0[col_id][row_pivot]);
@@ -715,7 +715,7 @@ where K: LinearScalar<Real = f32>
 				if row_id == row_pivot {
 					continue;
 				}
-				if result.data.0[col_pivot][row_id] != K::zero(){
+				if result.data.0[col_pivot][row_id].abs() > EPSILON{
 					let scalar = result.data.0[col_pivot][row_id];
 					for col_id in col_pivot..C{
 						result.data.0[col_id][row_id] = result.data.0[col_id][row_id] - (scalar * result.data.0[col_id][row_pivot]);
@@ -765,6 +765,7 @@ where K: LinearScalar<Real = f32>
 					for col_id in col_pivot..C{
 						result.data.0[col_id][row_id] = result.data.0[col_id][row_id] - (scalar * result.data.0[col_id][row_pivot]);
 					}
+					result.data.0[col_pivot][row_id] = K::zero();
 				}
 			}
 

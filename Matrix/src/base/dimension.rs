@@ -4,6 +4,12 @@ use std::fmt::Debug;
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct Dyn(pub usize);
 
+
+/// Trait implemented by any type that can be used as a dimension 
+/// (for dimensions not known at compile-time).
+///
+/// # Safety
+///
 pub unsafe trait Dim: Any + Debug + Copy + PartialEq + Send + Sync {
 	#[inline(always)]
 	fn is<D: Dim>() -> bool {
